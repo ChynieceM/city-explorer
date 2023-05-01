@@ -1,23 +1,24 @@
-import logo from './logo.svg';
 import './App.css';
+import Explore from './Explore';
+import axios from "axios";
+//import { useState } from 'react';
+//import { useEffect } from 'react';
 
 function App() {
+  //const [myCity, setMyCity] = useState("");
+
+  const fetchData = async () => {
+    const response = await axios.get("https://us1.locationiq.com/v1/search?key=pk.e65687e540287de5bf7920f2c5a4d514&q=Memphis%2CTennessee&format=json");
+    console.log("response", response)
+   // return setMyCity(response.data);
+  }
+
+//  // useEffect(() => {
+//     fetchData();
+  // }, [])
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Explore fetchData={fetchData} />
     </div>
   );
 }
