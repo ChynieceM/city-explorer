@@ -8,7 +8,7 @@ function App() {
 
   const fetchData = async () => {
     const response = await axios.get(`https://us1.locationiq.com/v1/search?key=pk.e65687e540287de5bf7920f2c5a4d514&q=${myCity}&format=json`);
-    console.log("response", response.data)
+   // console.log("response", response.data)
    return response.data;
   }
 
