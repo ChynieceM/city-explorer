@@ -5,11 +5,13 @@ import { useState } from 'react';
 
 function App() {
   const [myCity, setMyCity] = useState('');
+  let displayCity = "";
   const fetchData = async () => {
     try {
       const response = await axios.get(`https://us1.locationiq.com/v1/search?key=pk.e65687e540287de5bf7920f2c5a4d514&q=${myCity}&format=json`);
       //console.log("response", response.data)
-      return response.data;
+      displayCity = response.data;
+      return displayCity
     } catch (error) {
       console.error(error);
     }
@@ -24,6 +26,9 @@ function App() {
         <input type="text" value={myCity} onChange={handleCity} id="cityInput" placeholder="City Name" />
         <button onClick={fetchData}>Explore!</button>
       </label>
+      <div>
+        {displayCity}
+      </div>
     </div>
   );
 }
