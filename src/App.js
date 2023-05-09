@@ -1,24 +1,62 @@
 import './App.css';
-import React from 'react';
+import React, { useEffect } from 'react';
 import axios from "axios";
 import { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {Card, Button, Form} from 'react-bootstrap';
-
+import { Card, Button, Form } from 'react-bootstrap';
+import Weather from './Weather';
 
 
 
 function App() {
+  // Creating a state variable called location and a function to update it
+  const [location, setLocation] = useState('');
+  const [responseData, setResponseData] = useState([]);
+  const [input, setInput] = useState('');
   const [myCity, setMyCity] = useState('');
   const [displayCity, setdisplayCity] = useState('');
   const [displayMap, setdisplayMap] = useState('none');
+
+  
+  //fetches data from our weather API based on the location
+  const fetchLocationData = async () => {
+    try {
+      let response = await axios.get(`http://localhost:3001/weather/?searchQuery=${location}`)
+      //Updating responseData with the first result from the API response
+      setResponseData(response.data)
+      console.log(response);
+      //catch errors during the request
+    } catch (error) {
+      //If the error response status is 404 (or Not Found) alert user
+      console.log(error)
+    //   if ( error.response.status === 500) {
+    //     alert('Enter a valid city :)');
+    //   }
+    }
+    
+  };
+  //calls async function to fetch data
+  useEffect(() => {
+    if (location !== ''){
+      fetchLocationData(); 
+    }
+  },[location]);
+
+  let threeDayForecast;
+  if (responseData !== []){
+     threeDayForecast = responseData.map(element=>{
+      return  <Weather style={{ display: "flex", justifyContent: "center", alignItems: "center",}} description={element?.description} /> 
+     })}; 
+
+
   const fetchData = async () => {
     try {
       const response = await axios.get(`https://us1.locationiq.com/v1/search?key=pk.e65687e540287de5bf7920f2c5a4d514&q=${myCity}&format=json`);
       console.log("response", response.data)
       setdisplayCity(response.data[0]);
       setdisplayMap('block');
-      
+    
+
     } catch (error) {
       alert('Please enter a valid city');
       console.error(error);
@@ -26,29 +64,40 @@ function App() {
   }
   const handleCity = (e) => {
     setMyCity(e.target.value);
+    setInput(e.target.value);
   };
   return (
-    <div className="App" style={{background: '#cce7e8', marginLeft:'40px', marginRight:'40px', marginTop:'20px', marginBottom:'20px'}}>
-      <Form style={{background: '#1e81b0'}}>
-      <fieldset>
-        <Form.Group className="mb-3">
-          <Form.Label style={{fontWeight: 'bold', fontSize:'50px'}} >Google Maps Misfits</Form.Label>
-          <Form.Control type="text" value={myCity} onChange={handleCity} id="cityInput" placeholder="City Name"  />
-        </Form.Group>
-        <Button style={{background: ' #35495e',  cursor: 'pointer'}} onClick={fetchData}>Submit</Button>
-      </fieldset>
-    </Form>
+    <div  style={{ height: '100vh', padding: '20px', margin:'10px 10px 10px 10px', border:'2px solid #990099' }}>
+      <Form style={{ display: "flex", justifyContent: "center", alignItems: "center",}}>
+        <fieldset>
+          <Form.Group className="mb-3">
+            <Form.Label style={{ fontWeight: 'bold', fontSize: '50px' }} >Google Maps Misfits</Form.Label>
+            <Form.Control type="text" value={myCity} onChange={handleCity} id="cityInput" placeholder="City Name" />
+          </Form.Group>
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center",}}>
+          <Button style={{ background: ' #35495e', cursor: 'pointer', padding: '0px 40px 5px 40px', margin: '3px 30 30 30px'}} onClick={(e) => {
+            e.preventDefault()
+            setLocation(input)
+            fetchData()
+            //setLocation function sets the location state variable to the current value of the input state variable
+          }}>Explore</Button>
+          </div>
+        </fieldset>
+      </Form>
       <div >
         <p>Location: {displayCity.display_name}</p>
         <p>Latitude: {displayCity.lat}</p>
         <p>Longitude: {displayCity.lon}</p>
-        <div className={'d-flex justify-content-center'}>
-          <Card style={{display: displayMap, marginBottom:'10px' }}>
+        <p>{threeDayForecast}</p>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center",}} >
+          <Card style={{ display: displayMap, marginBottom: '10px', marginTop: '0px', height: '40%', width:'40%' }}>
             <Card.Img variant="top" src={`https://maps.locationiq.com/v3/staticmap?key=pk.e65687e540287de5bf7920f2c5a4d514&center=${displayCity.lat},${displayCity.lon}`} alt="map" />
           </Card>
+          {/* renders the Weather component w/ props based on responseData state variable */}
         </div>
       </div>
     </div >
+    
   );
 }
 
