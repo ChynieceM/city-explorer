@@ -5,10 +5,20 @@ import { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Card, Button, Form } from 'react-bootstrap';
 import Weather from './Weather';
-import { MapContainer, TileLayer } from 'react-leaflet';
+import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerIconShadow from 'leaflet/dist/images/marker-shadow.png';
+import './rain.css';
 
+delete L.Icon.Default.prototype._getIconUrl;
 
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon,
+  iconUrl: markerIcon,
+  shadowUrl: markerIconShadow,
+});
 
 
 function App() {
@@ -19,7 +29,31 @@ function App() {
   const [myCity, setMyCity] = useState('');
   const [displayCity, setdisplayCity] = useState('');
   const [displayMap, setdisplayMap] = useState('none');
+  const [isRaining, setIsRaining] = useState(false);
 
+  const generateRaindrops = () => {
+    const numberOfDrops = 100;
+    const drops = [];
+  
+    for (let i = 0; i < numberOfDrops; i++) {
+      const delay = Math.random() * 1;
+      const speed = Math.random() * 0.7 + 0.7;
+      const left = Math.random() * 100;
+      drops.push(
+        <div
+          key={i}
+          className="drop"
+          style={{
+            left: `${left}vw`,
+            animationDuration: `${speed}s`,
+            animationDelay: `${delay}s`,
+          }}
+        ></div>
+      );
+    }
+  
+    return drops;
+  };
 
   //fetches data from our weather API based on the location
   const fetchLocationData = async () => {
@@ -57,7 +91,7 @@ function App() {
             alignItems: "center",
           }}
           description={element?.description}
-         />
+        />
       );
     })
   };
@@ -103,7 +137,9 @@ function App() {
         <div>Latitude: {displayCity.lat}</div>
         <div>Longitude: {displayCity.lon}</div>
         <div>{threeDayForecast}</div>
-        
+        <Button onClick={() => setIsRaining(!isRaining)} style={{ background: ' #35495e', cursor: 'pointer', padding: '0px 40px 5px 40px', margin: '30px 0px 0px 30px' }}>Let it rain</Button>
+        {isRaining && <div className="rain">{generateRaindrops()}</div>}
+
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", }} >
           <Card style={{ display: displayMap, marginBottom: '10px', marginTop: '0px', height: '40%', width: '40%' }}>
             {displayCity.lat && displayCity.lon ? (
@@ -116,6 +152,10 @@ function App() {
                   url="https://{s}-tiles.locationiq.com/v3/streets/r/{z}/{x}/{y}.png?key=pk.e65687e540287de5bf7920f2c5a4d514"
                   attribution='&copy; <a href="https://www.locationiq.com/">LocationIQ</a> contributors'
                 />
+                <Marker
+                  position={[displayCity.lat, displayCity.lon]}>
+                  <Popup> {[displayCity.display_name]}</Popup>
+                </Marker>
               </MapContainer>
             ) : null}
 
