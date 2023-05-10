@@ -1,3 +1,4 @@
+import React from 'react';
 //weather component takes in props from app
 //displays longitude, latitude, cityname and weather description
 //used to display info for each location
