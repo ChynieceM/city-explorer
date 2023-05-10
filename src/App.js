@@ -5,6 +5,9 @@ import { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Card, Button, Form } from 'react-bootstrap';
 import Weather from './Weather';
+import { MapContainer, TileLayer } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+
 
 
 
@@ -17,7 +20,7 @@ function App() {
   const [displayCity, setdisplayCity] = useState('');
   const [displayMap, setdisplayMap] = useState('none');
 
-  
+
   //fetches data from our weather API based on the location
   const fetchLocationData = async () => {
     try {
@@ -29,24 +32,35 @@ function App() {
     } catch (error) {
       //If the error response status is 404 (or Not Found) alert user
       console.log(error)
-    //   if ( error.response.status === 500) {
-    //     alert('Enter a valid city :)');
-    //   }
+      //   if ( error.response.status === 500) {
+      //     alert('Enter a valid city :)');
+      //   }
     }
-    
+
   };
   //calls async function to fetch data
   useEffect(() => {
-    if (location !== ''){
-      fetchLocationData(); 
+    if (location !== '') {
+      fetchLocationData();
     }
-  },[location]);
+  }, [location]);
 
   let threeDayForecast;
-  if (responseData !== []){
-     threeDayForecast = responseData.map(element=>{
-      return  <Weather style={{ display: "flex", justifyContent: "center", alignItems: "center",}} description={element?.description} /> 
-     })}; 
+  if (responseData !== []) {
+    threeDayForecast = responseData.map((element, index) => {
+      return (
+        <Weather
+          key={index}
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          description={element?.description}
+         />
+      );
+    })
+  };
 
 
   const fetchData = async () => {
@@ -55,7 +69,7 @@ function App() {
       console.log("response", response.data)
       setdisplayCity(response.data[0]);
       setdisplayMap('block');
-    
+
 
     } catch (error) {
       alert('Please enter a valid city');
@@ -67,37 +81,50 @@ function App() {
     setInput(e.target.value);
   };
   return (
-    <div  style={{ height: '100vh', padding: '20px', margin:'10px 10px 10px 10px', border:'2px solid #990099' }}>
-      <Form style={{ display: "flex", justifyContent: "center", alignItems: "center",}}>
+    <div style={{ height: '100vh', padding: '20px', margin: '10px 10px 10px 10px', border: '2px solid #990099' }}>
+      <Form style={{ display: "flex", justifyContent: "center", alignItems: "center", }}>
         <fieldset>
           <Form.Group className="mb-3">
             <Form.Label style={{ fontWeight: 'bold', fontSize: '50px' }} >Google Maps Misfits</Form.Label>
             <Form.Control type="text" value={myCity} onChange={handleCity} id="cityInput" placeholder="City Name" />
           </Form.Group>
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center",}}>
-          <Button style={{ background: ' #35495e', cursor: 'pointer', padding: '0px 40px 5px 40px', margin: '3px 30 30 30px'}} onClick={(e) => {
-            e.preventDefault()
-            setLocation(input)
-            fetchData()
-            //setLocation function sets the location state variable to the current value of the input state variable
-          }}>Explore</Button>
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", }}>
+            <Button style={{ background: ' #35495e', cursor: 'pointer', padding: '0px 40px 5px 40px', margin: '3px 30 30 30px' }} onClick={(e) => {
+              e.preventDefault()
+              setLocation(input)
+              fetchData()
+              //setLocation function sets the location state variable to the current value of the input state variable
+            }}>Explore</Button>
           </div>
         </fieldset>
       </Form>
       <div >
-        <p>Location: {displayCity.display_name}</p>
-        <p>Latitude: {displayCity.lat}</p>
-        <p>Longitude: {displayCity.lon}</p>
-        <p>{threeDayForecast}</p>
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center",}} >
-          <Card style={{ display: displayMap, marginBottom: '10px', marginTop: '0px', height: '40%', width:'40%' }}>
-            <Card.Img variant="top" src={`https://maps.locationiq.com/v3/staticmap?key=pk.e65687e540287de5bf7920f2c5a4d514&center=${displayCity.lat},${displayCity.lon}`} alt="map" />
+        <div>Location: {displayCity.display_name}</div>
+        <div>Latitude: {displayCity.lat}</div>
+        <div>Longitude: {displayCity.lon}</div>
+        <div>{threeDayForecast}</div>
+        
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", }} >
+          <Card style={{ display: displayMap, marginBottom: '10px', marginTop: '0px', height: '40%', width: '40%' }}>
+            {displayCity.lat && displayCity.lon ? (
+              <MapContainer
+                center={[displayCity.lat, displayCity.lon]}
+                zoom={12}
+                style={{ display: displayMap, height: "500px", width: "600px" }} scrollWheelZoom={false}
+              >
+                <TileLayer
+                  url="https://{s}-tiles.locationiq.com/v3/streets/r/{z}/{x}/{y}.png?key=pk.e65687e540287de5bf7920f2c5a4d514"
+                  attribution='&copy; <a href="https://www.locationiq.com/">LocationIQ</a> contributors'
+                />
+              </MapContainer>
+            ) : null}
+
           </Card>
           {/* renders the Weather component w/ props based on responseData state variable */}
         </div>
       </div>
     </div >
-    
+
   );
 }
 
