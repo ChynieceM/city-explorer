@@ -11,7 +11,8 @@ import L from 'leaflet';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerIconShadow from 'leaflet/dist/images/marker-shadow.png';
 import './rain.css';
-
+import Movie from './Movie';
+//rain animation requirements 
 delete L.Icon.Default.prototype._getIconUrl;
 
 L.Icon.Default.mergeOptions({
@@ -29,8 +30,9 @@ function App() {
   const [myCity, setMyCity] = useState('');
   const [displayCity, setdisplayCity] = useState('');
   const [displayMap, setdisplayMap] = useState('none');
+  const [movies, setMovies] = useState([]);
   const [isRaining, setIsRaining] = useState(false);
-
+//for rain animation
   const generateRaindrops = () => {
     const numberOfDrops = 100;
     const drops = [];
@@ -54,7 +56,14 @@ function App() {
   
     return drops;
   };
-
+const fetchMovieData = async () => {
+  try {
+    let response = await axios.get(`http://localhost:3001/movies?searchQuery=${input}`)
+    setMovies(response.data)
+  } catch (error) {
+    console.log(error)
+  }
+}
   //fetches data from our weather API based on the location
   const fetchLocationData = async () => {
     try {
@@ -76,6 +85,7 @@ function App() {
   useEffect(() => {
     if (location !== '') {
       fetchLocationData();
+      fetchMovieData();
     }
   }, [location]);
 
@@ -141,6 +151,8 @@ function App() {
         {isRaining && <div className="rain">{generateRaindrops()}</div>}
 
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", }} >
+          {/* renders the Weather component w/ props based on responseData state variable */}
+          <Movie movies={movies}/>
           <Card style={{ display: displayMap, marginBottom: '10px', marginTop: '0px', height: '40%', width: '40%' }}>
             {displayCity.lat && displayCity.lon ? (
               <MapContainer
@@ -160,7 +172,6 @@ function App() {
             ) : null}
 
           </Card>
-          {/* renders the Weather component w/ props based on responseData state variable */}
         </div>
       </div>
     </div >
