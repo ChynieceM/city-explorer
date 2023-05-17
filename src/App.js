@@ -58,7 +58,7 @@ function App() {
   };
 const fetchMovieData = async () => {
   try {
-    let response = await axios.get(`http://localhost:3001/movies?searchQuery=${input}`)
+    let response = await axios.get(`https://city-explorer-api-sdwd.onrender.com/movies?searchQuery=${input}`)
     setMovies(response.data)
   } catch (error) {
     console.log(error)
@@ -67,7 +67,8 @@ const fetchMovieData = async () => {
   //fetches data from our weather API based on the location
   const fetchLocationData = async () => {
     try {
-      let response = await axios.get(`http://localhost:3001/weather/?searchQuery=${location}`)
+      
+      let response = await axios.get(`https://city-explorer-api-sdwd.onrender.com/weather/?searchQuery=${input}`)
       //Updating responseData with the first result from the API response
       setResponseData(response.data)
       console.log(response);
@@ -84,8 +85,8 @@ const fetchMovieData = async () => {
   //calls async function to fetch data
   useEffect(() => {
     if (location !== '') {
-      fetchLocationData();
-      fetchMovieData();
+      fetchLocationData(fetchMovieData());
+      
     }
   }, [location]);
 
@@ -101,6 +102,7 @@ const fetchMovieData = async () => {
             alignItems: "center",
           }}
           description={element?.description}
+          valid_date={element?.valid_date}
         />
       );
     })
