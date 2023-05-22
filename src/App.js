@@ -53,6 +53,7 @@ function App() {
   const fetchMovieData = async () => {
     try {
       let response = await axios.get(`https://city-explorer-api-sdwd.onrender.com/movies?searchQuery=${input}`)
+      console.log('API response:', response.data);
       setMovies(response.data)
     } catch (error) {
       console.log(error)
@@ -64,8 +65,9 @@ function App() {
 
       let response = await axios.get(`https://city-explorer-api-sdwd.onrender.com/weather/?searchQuery=${input}`)
       //Updating responseData with the first result from the API response
-      setResponseData(response.data)
-      console.log(response);
+      console.log('API response:', response.data);
+      setResponseData(Array.isArray(response.data) ? response.data : []);
+      // console.log(response);
       //catch errors during the request
     } catch (error) {
       //If the error response status is 404 (or Not Found) alert user
@@ -79,13 +81,13 @@ function App() {
   //calls async function to fetch data
   useEffect(() => {
     if (location !== '') {
-      fetchLocationData(fetchMovieData());
-
+      fetchLocationData();
+      fetchMovieData();
     }
   }, [location]);
 
   let threeDayForecast;
-  if (responseData !== []) {
+  if (Array.isArray(responseData)) {
     threeDayForecast = responseData.map((element, index) => {
       return (
         <Weather
@@ -123,14 +125,15 @@ function App() {
   return (
     <div style={{ height: '100vh', padding: '20px', margin: '10px 10px 10px 10px', border: '2px solid #990099' }}>
       <Location setLocation={setLocation} myCity={myCity} input={input} fetchData={fetchData} handleCity={handleCity} displayCity={displayCity}/>
-      <div >
-        <div>{threeDayForecast}</div>
         <Button onClick={() => setIsRaining(!isRaining)} style={{ background: ' #35495e', cursor: 'pointer', padding: '0px 40px 5px 40px', margin: '30px 0px 0px 30px' }}>Let it rain</Button>
         {isRaining && <div className="rain">{generateRaindrops()}
         </div>
         }
+        <div>{threeDayForecast}</div>
+      <div >
 
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", }} >
+          {console.log(movies)}
           <Movie movies={movies} />
           <Map displayMap={displayMap} displayCity={displayCity}/>
         </div>
